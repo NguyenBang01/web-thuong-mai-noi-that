@@ -1,0 +1,61 @@
+---
+const newsList = [
+  {
+    title: "Xu Hướng Nội Thất 2026 – Tinh Tế & Bền Vững",
+    date: "10/03/2026",
+    excerpt: "Khám phá những phong cách thiết kế nổi bật năm 2026 hướng tới sự kết nối thiên nhiên và tối ưu không gian sống...",
+    image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600"
+  },
+  {
+    title: "Bàn Trà – Điểm Nhấn Hoàn Hảo Cho Phòng Khách",
+    date: "23/02/2026",
+    excerpt: "Thiết kế đa dạng, đường nét tinh tế và chất liệu tự nhiên giúp bàn trà trở thành trái tim của căn phòng...",
+    image: "https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=600"
+  },
+  {
+    title: "Giải Pháp Nội Thất Văn Phòng Hiện Đại",
+    date: "23/02/2026",
+    excerpt: "Tối ưu công năng sử dụng với hệ thống bàn ghế ergonomic giúp tăng cảm hứng làm việc mỗi ngày...",
+    image: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600"
+  }
+];
+---
+
+<section class="w-full bg-emerald-50/70 py-16 font-sans">
+  <div class="max-w-7xl mx-auto px-4">
+    
+    <!-- Title -->
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-extrabold text-emerald-700 tracking-tight uppercase">
+        TIN TỨC
+      </h2>
+    </div>
+
+    <!-- News Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {newsList.map((item) => (
+        <article class="bg-white rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition duration-300 border border-emerald-100 flex flex-col justify-between">
+          <div>
+            <div class="h-48 overflow-hidden">
+              <img 
+                src={item.image} 
+                alt={item.title} 
+                class="w-full h-full object-cover hover:scale-105 transition duration-300"
+              />
+            </div>
+            <div class="p-6">
+              <h3 class="font-bold text-emerald-950 text-base mb-2 line-clamp-2 hover:text-emerald-700 transition cursor-pointer">
+                {item.title}
+              </h3>
+              <p class="text-xs text-slate-400 mb-3">{item.date}</p>
+              <p class="text-slate-600 text-xs leading-relaxed line-clamp-3">
+                {item.excerpt}
+              </p>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+
+  </div>
+</section>

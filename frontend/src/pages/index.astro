@@ -3,8 +3,12 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
 import CategoryGrid from '../components/CategoryGrid.astro';
-import BrandShowcase from '../components/BrandShowcase.astro';
 import FlashSale from '../components/FlashSale.astro';
+import ShowroomSection from '../components/ShowroomSection.astro';
+import CollectionsSection from '../components/CollectionsSection.astro';
+import BrandShowcase from '../components/BrandShowcase.astro';
+import TrustFeatures from '../components/TrustFeatures.astro';
+import NewsSection from '../components/NewsSection.astro';
 import Footer from '../components/Footer.astro';
 
 // Fetch real products from Backend API
@@ -36,11 +40,23 @@ try {
     <!-- Category Grid Showcase -->
     <CategoryGrid />
 
+    <!-- Flash Sale & Products Grid -->
+    <FlashSale products={products} />
+
+    <!-- Showroom Showcase Section (Mỗi không gian một câu chuyện - Phòng trưng bày) -->
+    <ShowroomSection products={products} />
+
+    <!-- Collections Section (BST Modern Living, BST Luxury, BST Minimalist) -->
+    <CollectionsSection />
+
     <!-- Brand Showcase Section (Glassmorphism) -->
     <BrandShowcase />
 
-    <!-- Flash Sale & Products Grid -->
-    <FlashSale products={products} />
+    <!-- Trust Features Bar (Cam kết chính hãng, Giao hàng miễn phí, Đổi trả 7 ngày) -->
+    <TrustFeatures />
+
+    <!-- News & Blog Section (Tin tức) -->
+    <NewsSection />
 
     <!-- Footer -->
     <Footer />
