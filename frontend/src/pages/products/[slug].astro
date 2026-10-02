@@ -1,0 +1,95 @@
+---
+// Chuyển sang chế độ SSR để đọc param dynamic slug từ URL khi client gửi request
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+let product = null;
+try {
+  const res = await fetch(`http://localhost:8080/api/products/${slug}`);
+  if (res.ok) {
+    product = await res.json();
+  }
+} catch (error) {
+  console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
+}
+---
+
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{product ? product.name : 'Sản phẩm không tồn tại'} - NAMQUAN FURNITURE</title>
+  </head>
+  <body class="bg-gray-50 text-gray-800 font-sans">
+    
+    <!-- Navbar -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold tracking-wider text-amber-900">NAMQUAN FURNITURE</a>
+        <nav class="space-x-6 text-sm font-medium">
+          <a href="/" class="hover:text-amber-800">Trang chủ</a>
+          <a href="/gioi-thieu" class="hover:text-amber-800">Giới thiệu</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-4 py-12">
+      <a href="/" class="text-sm text-gray-500 hover:text-amber-900 mb-6 inline-block">← Quay lại danh sách sản phẩm</a>
+
+      {!product ? (
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-12 text-center">
+          <h1 class="text-2xl font-bold text-red-600 mb-2">Sản phẩm không tồn tại</h1>
+          <p class="text-gray-500 text-sm mb-6">Sản phẩm bạn đang tìm kiếm không tồn tại hoặc Server Backend API chưa hoạt động.</p>
+          <a href="/" class="bg-amber-900 hover:bg-amber-800 text-white px-5 py-2.5 rounded-lg text-sm transition inline-block">
+            Quay lại trang chủ
+          </a>
+        </div>
+      ) : (
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Image -->
+          <div>
+            <img src={product.image} alt={product.name} class="w-full h-96 object-cover rounded-lg" />
+          </div>
+
+          <!-- Info -->
+          <div class="flex flex-col justify-between">
+            <div>
+              <span class="text-xs text-amber-700 bg-amber-50 px-2.5 py-1 rounded">
+                {product.category?.name || 'Nội thất'}
+              </span>
+              <h1 class="text-3xl font-bold mt-3 text-gray-900">{product.name}</h1>
+              
+              <div class="mt-4 flex items-baseline space-x-3">
+                <span class="text-2xl font-bold text-amber-900">
+                  {product.sale_price > 0 ? product.sale_price.toLocaleString('vi-VN') : product.price.toLocaleString('vi-VN')} đ
+                </span>
+                {product.sale_price > 0 && (
+                  <span class="text-sm text-gray-400 line-through">
+                    {product.price.toLocaleString('vi-VN')} đ
+                  </span>
+                )}
+              </div>
+
+              <div class="mt-6 space-y-2 border-t border-b border-gray-100 py-4 text-sm">
+                <p><strong class="text-gray-700">Chất liệu:</strong> {product.material || 'Đang cập nhật'}</p>
+                <p><strong class="text-gray-700">Kích thước:</strong> {product.dimensions || 'Đang cập nhật'}</p>
+                <p><strong class="text-gray-700">Tình trạng:</strong> {product.stock > 0 ? `Còn hàng (${product.stock})` : 'Hết hàng'}</p>
+              </div>
+
+              <p class="mt-4 text-gray-600 text-sm leading-relaxed">{product.description}</p>
+            </div>
+
+            <div class="mt-8 flex gap-4">
+              <button class="flex-1 bg-amber-900 hover:bg-amber-800 text-white py-3 rounded-lg font-medium transition">
+                Thêm vào giỏ hàng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </main>
+
+  </body>
+</html>

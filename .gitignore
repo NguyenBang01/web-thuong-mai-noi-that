@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Build outputs
+dist/
+frontend/dist/
+frontend/.astro/
+*.exe
+
+# Logs and Env
+*.log
+.env
+.DS_Store
