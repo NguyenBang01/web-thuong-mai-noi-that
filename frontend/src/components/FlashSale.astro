@@ -1,0 +1,185 @@
+---
+interface Product {
+  id: number;
+  name: string;
+  slug: string;
+  price: number;
+  sale_price: number;
+  image: string;
+  category?: { name: string };
+}
+
+const { products = [] } = Astro.props as { products: Product[] };
+
+// Fallback items if database list is small
+const displayProducts = products.length > 0 ? products : [
+  {
+    id: 101,
+    name: "Giường Ngủ Hoàng Gia Gỗ Sồi",
+    slug: "giuong-ngu-hoang-gia",
+    price: 15000000,
+    sale_price: 11000000,
+    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600",
+    category: { name: "Ghế Sofa" },
+  },
+  {
+    id: 102,
+    name: "Ghế Armchair Thư Giãn Cream",
+    slug: "ghe-armchair-cream",
+    price: 9500000,
+    sale_price: 7500000,
+    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600",
+    category: { name: "Ghế Sofa" },
+  },
+  {
+    id: 103,
+    name: "Sofa Đơn Đương Đại NAMQUAN",
+    slug: "sofa-don-duong-dai",
+    price: 9800000,
+    sale_price: 7500000,
+    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600",
+    category: { name: "Ghế Sofa" },
+  },
+  {
+    id: 104,
+    name: "Ghế Thư Giãn Nỉ Xanh Pastel",
+    slug: "ghe-thu-gian-nhi-xanh",
+    price: 9200000,
+    sale_price: 7500000,
+    image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=600",
+    category: { name: "Ghế Sofa" },
+  }
+];
+---
+
+<section class="w-full bg-emerald-50/50 py-12 font-sans">
+  <div class="max-w-7xl mx-auto px-4">
+    <!-- Outer Flash Sale Box Container -->
+    <div class="bg-gradient-to-b from-emerald-50/80 to-white/90 rounded-3xl p-6 md:p-8 border border-emerald-100 shadow-sm">
+      
+      <!-- Top Title & Countdown Timer Header -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-emerald-800 tracking-tight">
+            FLASH SALE NỘI THẤT
+          </h2>
+        </div>
+
+        <!-- Timer -->
+        <div class="flex items-center space-x-2 text-sm font-semibold text-slate-700">
+          <span class="text-slate-600 mr-2">Bắt đầu sau</span>
+          <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs text-amber-600 font-bold text-lg">00</div>
+          <span>:</span>
+          <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs text-amber-600 font-bold text-lg">01</div>
+          <span>:</span>
+          <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs text-amber-600 font-bold text-lg">21</div>
+          <span>:</span>
+          <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs text-amber-600 font-bold text-lg">56</div>
+        </div>
+      </div>
+
+      <!-- Time Slot Selection Buttons -->
+      <div class="flex items-center space-x-4 mb-8">
+        <button class="bg-emerald-800 text-white font-medium px-5 py-2.5 rounded-lg text-sm shadow-xs transition">
+          12 - 15h 05/06
+        </button>
+        <button class="bg-white text-slate-700 hover:text-emerald-800 border border-slate-300 font-medium px-5 py-2.5 rounded-lg text-sm transition">
+          20 - 22h 05/06
+        </button>
+      </div>
+
+      <!-- Flash Sale Product Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {displayProducts.map((item) => (
+          <div class="bg-white rounded-2xl p-4 shadow-xs hover:shadow-md transition duration-300 border border-slate-100 flex flex-col justify-between relative group">
+            
+            <!-- Floating Wishlist & Cart Action Buttons -->
+            <div class="absolute top-6 right-6 z-10 flex flex-col space-y-2">
+              <button class="w-8 h-8 rounded-full bg-white shadow-md border border-slate-100 flex items-center justify-center text-slate-400 hover:text-red-500 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+              </button>
+              <button class="w-8 h-8 rounded-full bg-white shadow-md border border-slate-100 flex items-center justify-center text-slate-600 hover:text-emerald-700 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Product Image -->
+            <a href={`/products/${item.slug}`} class="block h-52 overflow-hidden rounded-xl mb-4 bg-slate-50">
+              <img 
+                src={item.image} 
+                alt={item.name} 
+                class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+              />
+            </a>
+
+            <!-- Color Swatches -->
+            <div class="flex items-center space-x-1.5 mb-3">
+              <span class="w-3.5 h-3.5 rounded-full bg-amber-200 border border-slate-300 inline-block cursor-pointer"></span>
+              <span class="w-3.5 h-3.5 rounded-full bg-rose-200 border border-slate-300 inline-block cursor-pointer"></span>
+              <span class="w-3.5 h-3.5 rounded-full bg-stone-200 border border-slate-300 inline-block cursor-pointer"></span>
+              <span class="w-3.5 h-3.5 rounded-full bg-emerald-200 border border-slate-300 inline-block cursor-pointer"></span>
+              <span class="w-3.5 h-3.5 rounded-full bg-slate-900 border border-slate-300 inline-block cursor-pointer"></span>
+            </div>
+
+            <!-- Product Details -->
+            <div>
+              <span class="text-xs text-slate-500 block mb-1">
+                {item.category?.name || 'Ghế Sofa'}
+              </span>
+              <a href={`/products/${item.slug}`}>
+                <h4 class="font-medium text-slate-800 text-sm line-clamp-1 hover:text-emerald-700 transition">
+                  {item.name}
+                </h4>
+              </a>
+
+              <!-- Price -->
+              <div class="mt-3 flex items-baseline justify-between">
+                <span class="text-lg font-bold text-amber-600">
+                  {(item.sale_price > 0 ? item.sale_price : item.price).toLocaleString('vi-VN')} <span class="text-xs font-normal text-amber-600">VND</span>
+                </span>
+              </div>
+
+              <!-- Stock Bar -->
+              <div class="mt-3">
+                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                  <div class="bg-amber-500 h-full rounded-full" style="width: 80%"></div>
+                </div>
+                <div class="flex justify-between items-center text-[10px] text-slate-500 mt-1">
+                  <span>Đã bán 24</span>
+                  <span>Còn lại 6</span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        ))}
+      </div>
+
+    </div>
+
+    <!-- Product Filter Tabs below Flash Sale -->
+    <div class="mt-12 flex justify-between items-center border-b border-emerald-100 pb-2">
+      <div class="flex space-x-2">
+        <button class="bg-emerald-100 text-emerald-900 font-semibold px-6 py-2.5 rounded-t-xl text-sm transition">
+          Hàng mới về
+        </button>
+        <button class="bg-transparent text-slate-600 hover:text-emerald-800 font-medium px-6 py-2.5 rounded-t-xl text-sm transition">
+          Bán chạy
+        </button>
+      </div>
+
+      <a href="/products" class="text-sm font-semibold text-slate-800 hover:text-emerald-700 flex items-center transition">
+        <span>Xem tất cả</span>
+        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+        </svg>
+      </a>
+    </div>
+
+  </div>
+</section>
