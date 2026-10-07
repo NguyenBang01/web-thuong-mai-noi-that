@@ -8,8 +8,8 @@
     <!-- Brand Logo -->
     <a href="/" class="flex items-center space-x-1">
       <div class="text-2xl font-black tracking-wider text-slate-800 flex items-center">
-        <span>NAM</span>
-        <span class="text-slate-800 ml-1">QUAN</span>
+        <span>KHÔNG GIAN</span>
+        <span class="text-emerald-700 ml-1">MỚI</span>
         <svg class="w-6 h-6 text-emerald-500 ml-1 inline" viewBox="0 0 24 24" fill="currentColor">
           <path d="M17 8C8 10 59 16.5 18 22 12 18 10 12 17 8z"/>
         </svg>
@@ -18,14 +18,14 @@
 
     <!-- Top Right Action Icons -->
     <div class="flex items-center space-x-6 text-xs font-medium text-slate-700">
-      <!-- User Profile -->
-      <a href="#" class="flex flex-col items-center hover:text-emerald-700 transition">
+      <!-- User Profile (Click to Login) -->
+      <a href="/?auth=login" class="flex flex-col items-center hover:text-emerald-700 transition">
         <div class="w-6 h-6 rounded-full border border-slate-400 flex items-center justify-center mb-0.5">
           <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
           </svg>
         </div>
-        <span>Thảo Uyên</span>
+        <span>Đăng nhập</span>
       </a>
 
       <!-- Shopping Cart -->
@@ -61,12 +61,25 @@
   </div>
 
   <!-- Sub Navigation Bar & Search Overlay -->
-  <div class="border-t border-slate-100 bg-white">
+  <div class="border-t border-slate-100 bg-white relative">
     <div class="max-w-7xl mx-auto px-4 py-2.5 flex justify-between items-center">
       <!-- Main Category Nav Links -->
       <nav class="flex items-center space-x-8 text-sm font-medium text-slate-800">
         <a href="/" class="hover:text-emerald-700 transition font-semibold">Trang chủ</a>
-        <a href="/products" class="hover:text-emerald-700 transition">Sản phẩm</a>
+
+        <!-- Nút Sản phẩm kích hoạt Mega Menu khi BẤM -->
+        <button 
+          id="product-menu-btn" 
+          type="button" 
+          class="inline-flex items-center space-x-1.5 hover:text-emerald-700 transition focus:outline-none cursor-pointer py-1"
+          aria-expanded="false"
+        >
+          <span>Sản phẩm</span>
+          <svg id="product-menu-chevron" class="w-4 h-4 text-slate-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+
         <a href="#" class="hover:text-emerald-700 transition">Bộ sưu tập</a>
         <a href="#" class="hover:text-emerald-700 transition">Dự án</a>
         <a href="#" class="hover:text-emerald-700 transition">Tin tức</a>
@@ -77,7 +90,7 @@
       <div class="relative w-72">
         <input 
           type="text" 
-          placeholder="Tìm kiếm" 
+          placeholder="Tìm sản phẩm..." 
           class="w-full bg-emerald-50/70 text-slate-800 placeholder-emerald-800/60 text-sm px-4 py-2 pl-9 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500/50 border border-emerald-100"
         />
         <svg class="w-4 h-4 text-emerald-800 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,5 +98,241 @@
         </svg>
       </div>
     </div>
+
+    <!-- ==================== MEGA MENU SẢN PHẨM ==================== -->
+    <div 
+      id="product-mega-menu" 
+      class="hidden absolute top-full left-0 w-full bg-white border-t border-slate-200 shadow-2xl z-50 animate-fadeIn"
+    >
+      <div class="max-w-7xl mx-auto px-6 py-8">
+        <div class="grid grid-cols-7 gap-6 text-xs text-slate-600">
+
+          <!-- CỘT 1: SOFA & GHẾ -->
+          <div class="space-y-6">
+            <div>
+              <h4 class="font-bold text-slate-900 uppercase tracking-wider text-xs mb-3">SOFA</h4>
+              <ul class="space-y-2">
+                <li><a href="/products?type=sofa-bang" class="hover:text-emerald-700 transition block">Sofa băng</a></li>
+                <li><a href="/products?type=sofa-goc" class="hover:text-emerald-700 transition block">Sofa góc</a></li>
+                <li><a href="/products?type=sofa-dien" class="hover:text-emerald-700 transition block">Sofa điện</a></li>
+                <li><a href="/products?type=sofa-bed" class="hover:text-emerald-700 transition block">Sofa bed</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 uppercase tracking-wider text-xs mb-3">GHẾ</h4>
+              <ul class="space-y-2">
+                <li><a href="/products?type=armchair" class="hover:text-emerald-700 transition block">Armchair</a></li>
+                <li><a href="/products?type=ghe-thu-gian" class="hover:text-emerald-700 transition block">Ghế thư giãn</a></li>
+                <li><a href="/products?type=ghe-dai-don" class="hover:text-emerald-700 transition block">Ghế dài & đôn</a></li>
+                <li><a href="/products?type=ghe-an" class="hover:text-emerald-700 transition block">Ghế ăn</a></li>
+                <li><a href="/products?type=ghe-bar" class="hover:text-emerald-700 transition block">Ghế bar</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- CỘT 2: BÀN -->
+          <div>
+            <h4 class="font-bold text-slate-900 uppercase tracking-wider text-xs mb-3">BÀN</h4>
+            <ul class="space-y-2">
+              <li><a href="/products?type=ban-an" class="hover:text-emerald-700 transition block">Bàn ăn</a></li>
+              <li><a href="/products?type=ban-ben" class="hover:text-emerald-700 transition block">Bàn bên</a></li>
+              <li><a href="/products?type=ban-nuoc" class="hover:text-emerald-700 transition block">Bàn nước</a></li>
+              <li><a href="/products?type=ban-console" class="hover:text-emerald-700 transition block">Bàn console</a></li>
+              <li><a href="/products?type=ban-lam-viec" class="hover:text-emerald-700 transition block">Bàn làm việc</a></li>
+              <li><a href="/products?type=ban-trang-diem" class="hover:text-emerald-700 transition block">Bàn trang điểm</a></li>
+              <li><a href="/products?type=xe-day" class="hover:text-emerald-700 transition block">Xe đẩy</a></li>
+            </ul>
+          </div>
+
+          <!-- CỘT 3: TỦ & KỆ -->
+          <div>
+            <h4 class="font-bold text-slate-900 uppercase tracking-wider text-xs mb-3">TỦ & KỆ</h4>
+            <ul class="space-y-2">
+              <li><a href="/products?type=tu-tivi" class="hover:text-emerald-700 transition block">Tủ tivi</a></li>
+              <li><a href="/products?type=tu-giay" class="hover:text-emerald-700 transition block">Tủ giày</a></li>
+              <li><a href="/products?type=tu-ly" class="hover:text-emerald-700 transition block">Tủ ly</a></li>
+              <li><a href="/products?type=tu-ao" class="hover:text-emerald-700 transition block">Tủ áo</a></li>
+              <li><a href="/products?type=tu-cabinet" class="hover:text-emerald-700 transition block">Tủ cabinet</a></li>
+              <li><a href="/products?type=tu-ruou" class="hover:text-emerald-700 transition block">Tủ rượu</a></li>
+              <li><a href="/products?type=tu-hoc-keo" class="hover:text-emerald-700 transition block">Tủ hộc kéo</a></li>
+              <li><a href="/products?type=tu-dau-giuong" class="hover:text-emerald-700 transition block">Tủ đầu giường</a></li>
+              <li><a href="/products?type=ke-treo-tuong" class="hover:text-emerald-700 transition block">Kệ treo tường</a></li>
+              <li><a href="/products?type=ke-trung-bay" class="hover:text-emerald-700 transition block">Kệ trưng bày</a></li>
+            </ul>
+          </div>
+
+          <!-- CỘT 4: GIƯỜNG & NỆM, NGOẠI THẤT, BẾP -->
+          <div class="space-y-5">
+            <div>
+              <h4 class="font-bold text-slate-900 uppercase tracking-wider text-xs mb-3">GIƯỜNG & NỆM</h4>
+              <ul class="space-y-2">
+                <li><a href="/products?type=giuong" class="hover:text-emerald-700 transition block">Giường</a></li>
+                <li><a href="/products?type=nem" class="hover:text-emerald-700 transition block">Nệm</a></li>
+                <li><a href="/products?type=chan-ga-goi" class="hover:text-emerald-700 transition block">Chăn ga gối</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 uppercase tracking-wider text-xs mb-3">NGOẠI THẤT</h4>
+              <ul class="space-y-2">
+                <li><a href="/products?type=ghe-ngoai-troi" class="hover:text-emerald-700 transition block">Ghế ngoài trời</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 uppercase tracking-wider text-xs mb-3">BẾP</h4>
+              <ul class="space-y-2">
+                <li><a href="/products?type=tu-bep" class="hover:text-emerald-700 transition block">Tủ bếp</a></li>
+                <li><a href="/products?type=thiet-bi-bep" class="hover:text-emerald-700 transition block">Thiết bị bếp</a></li>
+                <li><a href="/products?type=dung-cu-bep" class="hover:text-emerald-700 transition block">Dụng cụ bếp</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- CỘT 5: HƯƠNG THƠM, ĐÈN, THẢM -->
+          <div class="space-y-5">
+            <div>
+              <h4 class="font-bold text-slate-900 uppercase tracking-wider text-xs mb-3">HƯƠNG THƠM</h4>
+              <ul class="space-y-2">
+                <li><a href="/products?type=nen" class="hover:text-emerald-700 transition block">Nến</a></li>
+                <li><a href="/products?type=tinh-dau" class="hover:text-emerald-700 transition block">Tinh dầu</a></li>
+                <li><a href="/products?type=hoa-tinh-dau" class="hover:text-emerald-700 transition block">Hoa tinh dầu</a></li>
+                <li><a href="/products?type=bo-huong-thom" class="hover:text-emerald-700 transition block">Bộ hương thơm</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 uppercase tracking-wider text-xs mb-3">ĐÈN</h4>
+              <ul class="space-y-2">
+                <li><a href="/products?type=den-ban" class="hover:text-emerald-700 transition block">Đèn bàn</a></li>
+                <li><a href="/products?type=den-tran" class="hover:text-emerald-700 transition block">Đèn trần</a></li>
+                <li><a href="/products?type=den-san" class="hover:text-emerald-700 transition block">Đèn sàn</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-900 uppercase tracking-wider text-xs mb-3">THẢM</h4>
+              <ul class="space-y-2">
+                <li><a href="/products?type=tham-trang-tri" class="hover:text-emerald-700 transition block">Thảm trang trí</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- CỘT 6: TRANG TRÍ -->
+          <div>
+            <h4 class="font-bold text-slate-900 uppercase tracking-wider text-xs mb-3">TRANG TRÍ</h4>
+            <ul class="space-y-2">
+              <li><a href="/products?type=chan-nen" class="hover:text-emerald-700 transition block">Chân nến</a></li>
+              <li><a href="/products?type=binh-trang-tri" class="hover:text-emerald-700 transition block">Bình trang trí</a></li>
+              <li><a href="/products?type=goi-trang-tri" class="hover:text-emerald-700 transition block">Gối trang trí</a></li>
+              <li><a href="/products?type=khung-hinh" class="hover:text-emerald-700 transition block">Khung hình</a></li>
+              <li><a href="/products?type=tranh" class="hover:text-emerald-700 transition block">Tranh</a></li>
+              <li><a href="/products?type=guong" class="hover:text-emerald-700 transition block">Gương</a></li>
+              <li><a href="/products?type=dong-ho" class="hover:text-emerald-700 transition block">Đồng hồ</a></li>
+              <li><a href="/products?type=hoa-cay" class="hover:text-emerald-700 transition block">Hoa và cây</a></li>
+              <li><a href="/products?type=tuong-trang-tri" class="hover:text-emerald-700 transition block">Tượng trang trí</a></li>
+              <li><a href="/products?type=khay-trang-tri" class="hover:text-emerald-700 transition block">Khay trang trí</a></li>
+              <li><a href="/products?type=dung-cu-ban-an" class="hover:text-emerald-700 transition block">Dụng cụ bàn ăn</a></li>
+            </ul>
+          </div>
+
+          <!-- CỘT 7: BANNER KHUYẾN MÃI / BỘ SƯU TẬP -->
+          <div class="bg-slate-50 rounded-2xl p-4 flex flex-col justify-between border border-slate-100">
+            <div>
+              <div class="rounded-xl overflow-hidden mb-3 aspect-4/3 bg-slate-200">
+                <img 
+                  src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80" 
+                  alt="Không Gian Mới - Bộ sưu tập" 
+                  class="w-full h-full object-cover hover:scale-105 transition duration-500"
+                />
+              </div>
+              <div class="flex items-center space-x-1.5 text-slate-800 font-bold text-xs mb-1.5">
+                <span class="text-sm">🛋️</span>
+                <span>Nội thất đẹp cho không gian sống</span>
+              </div>
+              <p class="text-[11px] text-slate-500 leading-relaxed mb-4">
+                Khám phá bộ sưu tập nội thất mới nhất từ Không Gian Mới.
+              </p>
+            </div>
+
+            <a 
+              href="/products" 
+              class="w-full bg-slate-900 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-full text-center transition duration-200 inline-block text-xs"
+            >
+              Xem ngay
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
   </div>
 </header>
+
+<script>
+  function setupMegaMenu() {
+    const toggleBtn = document.getElementById('product-menu-btn');
+    const megaMenu = document.getElementById('product-mega-menu');
+    const menuChevron = document.getElementById('product-menu-chevron');
+
+    if (!toggleBtn || !megaMenu) return;
+
+    function openMenu() {
+      megaMenu?.classList.remove('hidden');
+      menuChevron?.classList.add('rotate-180');
+      toggleBtn?.classList.add('text-emerald-700', 'font-semibold');
+      toggleBtn?.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeMenu() {
+      megaMenu?.classList.add('hidden');
+      menuChevron?.classList.remove('rotate-180');
+      toggleBtn?.classList.remove('text-emerald-700', 'font-semibold');
+      toggleBtn?.setAttribute('aria-expanded', 'false');
+    }
+
+    // Toggle menu on click
+    toggleBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const isHidden = megaMenu.classList.contains('hidden');
+      if (isHidden) {
+        openMenu();
+      } else {
+        closeMenu();
+      }
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (!megaMenu.contains(target) && !toggleBtn.contains(target)) {
+        closeMenu();
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeMenu();
+      }
+    });
+  }
+
+  // Run on initial load and view transitions
+  setupMegaMenu();
+  document.addEventListener('astro:page-load', setupMegaMenu);
+</script>
+
+<style>
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.2s ease-out forwards;
+  }
+</style>

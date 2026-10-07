@@ -1,0 +1,192 @@
+<div id="auth-overlay" class="fixed inset-0 z-[100] hidden items-center justify-center overflow-y-auto bg-black/65 px-3 py-4 sm:px-5 sm:py-6" role="presentation">
+  <main id="auth-dialog" class="relative my-auto max-h-[92vh] w-full max-w-5xl overflow-y-auto bg-white px-5 py-6 text-slate-800 shadow-2xl sm:px-7 sm:py-7" role="dialog" aria-modal="true" aria-labelledby="auth-heading">
+    <button id="auth-close" type="button" aria-label="Đóng" class="absolute right-4 top-3 flex h-9 w-9 items-center justify-center text-3xl font-light leading-none text-slate-400 transition hover:text-slate-900">×</button>
+    <h1 id="auth-heading" class="sr-only">Đăng nhập hoặc đăng ký</h1>
+
+    <div class="grid divide-y divide-slate-200 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+      <section class="pb-6 sm:pb-0 sm:pr-6">
+        <h2 class="mb-4 text-xl font-medium tracking-wide text-slate-900 sm:text-2xl">ĐĂNG NHẬP</h2>
+        <form id="login-form" class="space-y-3">
+          <label class="block">
+            <span class="mb-1.5 block text-sm font-bold sm:text-base">Tên đăng nhập hoặc địa chỉ email <span class="text-rose-600">*</span></span>
+            <input name="identifier" autocomplete="username" required class="h-11 w-full border border-slate-300 bg-white px-3 outline-none transition focus:border-emerald-800 focus:ring-2 focus:ring-emerald-800/10" />
+          </label>
+          <label class="block">
+            <span class="mb-1.5 block text-sm font-bold sm:text-base">Mật khẩu <span class="text-rose-600">*</span></span>
+            <input name="password" type="password" autocomplete="current-password" required class="h-11 w-full border border-slate-300 bg-white px-3 outline-none transition focus:border-emerald-800 focus:ring-2 focus:ring-emerald-800/10" />
+          </label>
+          <label class="flex cursor-pointer items-center gap-3 pt-0.5 text-sm font-semibold">
+            <input name="remember" type="checkbox" class="h-4 w-4 accent-emerald-800" />
+            <span>Lưu thông tin đăng nhập</span>
+          </label>
+          <p id="login-message" class="hidden px-3 py-2 text-sm" role="alert"></p>
+          <button type="submit" class="bg-black px-6 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-900 disabled:cursor-wait disabled:opacity-60">ĐĂNG NHẬP</button>
+          <p class="text-sm text-slate-600">Quên mật khẩu?</p>
+          <div class="flex items-center gap-3 py-1 text-xs font-medium tracking-widest text-slate-400"><span class="h-px flex-1 bg-slate-200"></span><span>HOẶC</span><span class="h-px flex-1 bg-slate-200"></span></div>
+          <div id="google-signin-button" class="min-h-10"></div>
+        </form>
+      </section>
+
+      <section class="pt-6 sm:pt-0 sm:pl-6">
+        <h2 class="mb-4 text-xl font-medium tracking-wide text-slate-900 sm:text-2xl">ĐĂNG KÝ</h2>
+        <form id="register-form" class="space-y-3">
+          <label class="block">
+            <span class="mb-1.5 block text-sm font-bold sm:text-base">Tên đăng nhập <span class="text-rose-600">*</span></span>
+            <input name="username" autocomplete="username" required minlength="3" class="h-11 w-full border border-slate-300 bg-white px-3 outline-none transition focus:border-emerald-800 focus:ring-2 focus:ring-emerald-800/10" />
+          </label>
+          <label class="block">
+            <span class="mb-1.5 block text-sm font-bold sm:text-base">Địa chỉ email <span class="text-rose-600">*</span></span>
+            <input name="email" type="email" autocomplete="email" required class="h-11 w-full border border-slate-300 bg-white px-3 outline-none transition focus:border-emerald-800 focus:ring-2 focus:ring-emerald-800/10" />
+          </label>
+          <label class="block">
+            <span class="mb-1.5 block text-sm font-bold sm:text-base">Mật khẩu <span class="text-rose-600">*</span></span>
+            <input name="password" type="password" autocomplete="new-password" required minlength="8" class="h-11 w-full border border-slate-300 bg-white px-3 outline-none transition focus:border-emerald-800 focus:ring-2 focus:ring-emerald-800/10" />
+          </label>
+          <label class="block">
+            <span class="mb-1.5 block text-sm font-bold sm:text-base">Nhập lại mật khẩu <span class="text-rose-600">*</span></span>
+            <input name="confirmPassword" type="password" autocomplete="new-password" required minlength="8" class="h-11 w-full border border-slate-300 bg-white px-3 outline-none transition focus:border-emerald-800 focus:ring-2 focus:ring-emerald-800/10" />
+          </label>
+          <p class="text-sm leading-6 text-slate-600">Thông tin cá nhân được dùng để quản lý tài khoản và hỗ trợ trải nghiệm mua sắm của bạn.</p>
+          <p id="register-message" class="hidden px-3 py-2 text-sm" role="alert"></p>
+          <button type="submit" class="bg-black px-6 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-900 disabled:cursor-wait disabled:opacity-60">ĐĂNG KÝ</button>
+        </form>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+  const overlay = document.querySelector<HTMLDivElement>('#auth-overlay');
+  const closeButton = document.querySelector<HTMLButtonElement>('#auth-close');
+  const loginForm = document.querySelector<HTMLFormElement>('#login-form');
+  const registerForm = document.querySelector<HTMLFormElement>('#register-form');
+  const googleButton = document.querySelector<HTMLDivElement>('#google-signin-button');
+  const googleClientID = '169312903386-mrd6elqubhm99jmouhrsjf9ho0k7d3dp.apps.googleusercontent.com';
+
+  function closeAuthModal() {
+    overlay?.classList.add('hidden');
+    overlay?.classList.remove('flex');
+    document.body.classList.remove('overflow-hidden');
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  if (new URLSearchParams(window.location.search).has('auth')) {
+    overlay?.classList.remove('hidden');
+    overlay?.classList.add('flex');
+    document.body.classList.add('overflow-hidden');
+  }
+
+  closeButton?.addEventListener('click', closeAuthModal);
+  overlay?.addEventListener('click', (event) => {
+    if (event.target === overlay) closeAuthModal();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && overlay && !overlay.classList.contains('hidden')) closeAuthModal();
+  });
+
+  async function submitAuth(form: HTMLFormElement, kind: 'login' | 'register') {
+    const message = document.querySelector<HTMLParagraphElement>(`#${kind}-message`);
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    if (!message || !button) return;
+    const data = new FormData(form);
+    const password = String(data.get('password') ?? '');
+    const registering = kind === 'register';
+
+    if (registering && password !== String(data.get('confirmPassword') ?? '')) {
+      message.textContent = 'Mật khẩu nhập lại chưa khớp.';
+      message.className = 'bg-red-50 px-3 py-2 text-sm text-red-700';
+      return;
+    }
+
+    button.disabled = true;
+    const originalText = button.textContent;
+    button.textContent = registering ? 'ĐANG TẠO TÀI KHOẢN…' : 'ĐANG ĐĂNG NHẬP…';
+    message.className = 'hidden px-3 py-2 text-sm';
+    try {
+      const identifier = String(data.get('identifier') ?? '');
+      const response = await fetch(`http://localhost:8080/api/auth/${registering ? 'register' : 'login'}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: registering ? data.get('username') : identifier, email: registering ? data.get('email') : identifier, password }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Không thể hoàn tất yêu cầu lúc này.');
+      localStorage.setItem('noithat_auth_token', result.token);
+      localStorage.setItem('noithat_auth_user', JSON.stringify(result.user));
+      window.location.assign('/');
+    } catch (error) {
+      message.textContent = error instanceof Error && error.message.toLowerCase().includes('fetch')
+        ? 'Không kết nối được máy chủ. Hãy bật backend Go và kiểm tra MySQL.'
+        : error instanceof Error ? error.message : 'Đã có lỗi xảy ra.';
+      message.className = 'bg-red-50 px-3 py-2 text-sm text-red-700';
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  }
+
+  loginForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (loginForm) void submitAuth(loginForm, 'login');
+  });
+  registerForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (registerForm) void submitAuth(registerForm, 'register');
+  });
+
+  type GoogleResponse = { credential: string };
+  type GoogleWindow = Window & {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (options: { client_id: string; callback: (response: GoogleResponse) => void }) => void;
+          renderButton: (element: HTMLElement, options: Record<string, string | number>) => void;
+        };
+      };
+    };
+  };
+
+  async function signInWithGoogle(response: GoogleResponse) {
+    const message = document.querySelector<HTMLParagraphElement>('#login-message');
+    if (!message) return;
+    message.textContent = 'Đang xác minh tài khoản Google…';
+    message.className = 'bg-emerald-50 px-3 py-2 text-sm text-emerald-800';
+    try {
+      const result = await fetch('http://localhost:8080/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+      const data = await result.json();
+      if (!result.ok) throw new Error(data.error || 'Không thể đăng nhập bằng Google.');
+      localStorage.setItem('noithat_auth_token', data.token);
+      localStorage.setItem('noithat_auth_user', JSON.stringify(data.user));
+      window.location.assign('/');
+    } catch (error) {
+      message.textContent = error instanceof Error && error.message.toLowerCase().includes('fetch')
+        ? 'Không kết nối được máy chủ. Hãy bật backend Go và kiểm tra MySQL.'
+        : error instanceof Error ? error.message : 'Không thể đăng nhập bằng Google.';
+      message.className = 'bg-red-50 px-3 py-2 text-sm text-red-700';
+    }
+  }
+
+  if (googleButton) {
+    const googleScript = document.createElement('script');
+    googleScript.src = 'https://accounts.google.com/gsi/client';
+    googleScript.async = true;
+    googleScript.onload = () => {
+      const google = (window as GoogleWindow).google;
+      if (!google) return;
+      google.accounts.id.initialize({ client_id: googleClientID, callback: (response) => void signInWithGoogle(response) });
+      google.accounts.id.renderButton(googleButton, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        text: 'signin_with',
+        shape: 'rectangular',
+        locale: 'vi',
+        width: Math.max(200, Math.min(360, googleButton.clientWidth)),
+      });
+    };
+    document.head.appendChild(googleScript);
+  }
+</script>

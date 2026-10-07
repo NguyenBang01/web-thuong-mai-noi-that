@@ -1,11 +1,19 @@
 package main
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/api/idtoken"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -52,8 +60,10 @@ type Page struct {
 type User struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Username  string    `gorm:"size:100;uniqueIndex;not null" json:"username"`
+	Name      string    `gorm:"size:255" json:"name"`
 	Password  string    `gorm:"size:255;not null" json:"-"`
 	Email     string    `gorm:"size:255;uniqueIndex" json:"email"`
+	GoogleID  *string   `gorm:"size:255;uniqueIndex" json:"-"`
 	Role      string    `gorm:"size:50;default:'admin'" json:"role"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -91,6 +101,10 @@ func main() {
 	})
 
 	// --- ROUTES API ---
+	r.POST("/api/auth/register", registerUser)
+	r.POST("/api/auth/login", loginUser)
+	r.POST("/api/auth/google", googleLogin)
+	r.GET("/api/auth/me", currentUser)
 
 	// 1. API Test
 	r.GET("/ping", func(c *gin.Context) {
@@ -140,6 +154,186 @@ func main() {
 	r.Run(":8080")
 }
 
+type authRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+const defaultGoogleClientID = "169312903386-mrd6elqubhm99jmouhrsjf9ho0k7d3dp.apps.googleusercontent.com"
+
+type googleAuthRequest struct {
+	Credential string `json:"credential"`
+}
+
+func googleLogin(c *gin.Context) {
+	var input googleAuthRequest
+	if err := c.ShouldBindJSON(&input); err != nil || strings.TrimSpace(input.Credential) == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Thiếu thông tin xác thực Google."})
+		return
+	}
+
+	clientID := os.Getenv("GOOGLE_CLIENT_ID")
+	if clientID == "" {
+		clientID = defaultGoogleClientID
+	}
+	payload, err := idtoken.Validate(c.Request.Context(), input.Credential, clientID)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Không xác minh được tài khoản Google. Hãy thử lại."})
+		return
+	}
+	email, _ := payload.Claims["email"].(string)
+	name, _ := payload.Claims["name"].(string)
+	emailVerified, _ := payload.Claims["email_verified"].(bool)
+	if payload.Subject == "" || strings.TrimSpace(email) == "" || !emailVerified {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Google chưa xác nhận địa chỉ email của tài khoản này."})
+		return
+	}
+
+	email = strings.ToLower(strings.TrimSpace(email))
+	googleID := payload.Subject
+	var user User
+	err = db.Where("google_id = ?", googleID).First(&user).Error
+	if err == nil {
+		user.Email = email
+		if name != "" {
+			user.Name = name
+		}
+		if err := db.Save(&user).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể cập nhật tài khoản lúc này."})
+			return
+		}
+		respondWithAuth(c, user)
+		return
+	}
+	if err != gorm.ErrRecordNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể tra cứu tài khoản lúc này."})
+		return
+	}
+
+	// A verified Google email can link to an existing local account with the same email.
+	if err := db.Where("email = ?", email).First(&user).Error; err == nil {
+		user.GoogleID = &googleID
+		if name != "" {
+			user.Name = name
+		}
+		if err := db.Save(&user).Error; err != nil {
+			c.JSON(http.StatusConflict, gin.H{"error": "Tài khoản email này không thể liên kết với Google."})
+			return
+		}
+		respondWithAuth(c, user)
+		return
+	} else if err != gorm.ErrRecordNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể tra cứu tài khoản lúc này."})
+		return
+	}
+
+	username := "google_" + googleID
+	if len(username) > 100 {
+		username = username[:100]
+	}
+	if name == "" {
+		name = email
+	}
+	user = User{Username: username, Name: name, Email: email, GoogleID: &googleID, Role: "customer"}
+	if err := db.Create(&user).Error; err != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Không thể tạo tài khoản Google lúc này."})
+		return
+	}
+	respondWithAuth(c, user)
+}
+
+func registerUser(c *gin.Context) {
+	var input authRequest
+	if err := c.ShouldBindJSON(&input); err != nil || strings.TrimSpace(input.Username) == "" || strings.TrimSpace(input.Email) == "" || len(input.Password) < 8 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Vui lòng nhập tên, email và mật khẩu từ 8 ký tự."})
+		return
+	}
+	input.Username = strings.TrimSpace(input.Username)
+	input.Email = strings.ToLower(strings.TrimSpace(input.Email))
+	var existing User
+	if err := db.Where("email = ? OR username = ?", input.Email, input.Username).First(&existing).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Email hoặc tên đăng nhập đã được sử dụng."})
+		return
+	}
+	hash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể tạo tài khoản lúc này."})
+		return
+	}
+	user := User{Username: input.Username, Name: input.Username, Email: input.Email, Password: string(hash), Role: "customer"}
+	if err := db.Create(&user).Error; err != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Email hoặc tên đăng nhập đã được sử dụng."})
+		return
+	}
+	respondWithAuth(c, user)
+}
+
+func loginUser(c *gin.Context) {
+	var input authRequest
+	if err := c.ShouldBindJSON(&input); err != nil || strings.TrimSpace(input.Email) == "" || input.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Vui lòng nhập email và mật khẩu."})
+		return
+	}
+	var user User
+	identifier := strings.ToLower(strings.TrimSpace(input.Email))
+	if identifier == "" {
+		identifier = strings.TrimSpace(input.Username)
+	}
+	if err := db.Where("email = ? OR username = ?", identifier, identifier).First(&user).Error; err != nil || bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)) != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Email hoặc mật khẩu không chính xác."})
+		return
+	}
+	respondWithAuth(c, user)
+}
+
+func respondWithAuth(c *gin.Context, user User) {
+	expires := time.Now().Add(24 * time.Hour).Unix()
+	payload, _ := json.Marshal(map[string]interface{}{"id": user.ID, "username": user.Username, "exp": expires})
+	encoded := base64.RawURLEncoding.EncodeToString(payload)
+	mac := hmac.New(sha256.New, authSecret())
+	mac.Write([]byte(encoded))
+	token := encoded + "." + base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
+	c.JSON(http.StatusOK, gin.H{"token": token, "expires_at": expires, "user": gin.H{"id": user.ID, "username": user.Username, "name": user.Name, "email": user.Email}})
+}
+
+func currentUser(c *gin.Context) {
+	parts := strings.SplitN(strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer "), ".", 2)
+	if len(parts) != 2 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Phiên đăng nhập không hợp lệ."})
+		return
+	}
+	provided, err := base64.RawURLEncoding.DecodeString(parts[1])
+	mac := hmac.New(sha256.New, authSecret())
+	mac.Write([]byte(parts[0]))
+	if err != nil || !hmac.Equal(provided, mac.Sum(nil)) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Phiên đăng nhập không hợp lệ."})
+		return
+	}
+	data, err := base64.RawURLEncoding.DecodeString(parts[0])
+	var claims struct {
+		ID  uint  `json:"id"`
+		Exp int64 `json:"exp"`
+	}
+	if err != nil || json.Unmarshal(data, &claims) != nil || claims.Exp < time.Now().Unix() {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Phiên đăng nhập đã hết hạn."})
+		return
+	}
+	var user User
+	if db.First(&user, claims.ID).Error != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Không tìm thấy tài khoản."})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"user": gin.H{"id": user.ID, "username": user.Username, "name": user.Name, "email": user.Email}})
+}
+
+func authSecret() []byte {
+	if secret := os.Getenv("AUTH_SECRET"); secret != "" {
+		return []byte(secret)
+	}
+	return []byte("noithat-dev-only-change-this-secret")
+}
+
 func seedData() {
 	// 1. Seed Categories & Products
 	var catSofa Category
@@ -156,8 +350,8 @@ func seedData() {
 
 	products := []Product{
 		{
-			Name:        "Sofa Băng Bọc Da Cao Cấp NAMQUAN",
-			Slug:        "sofa-bang-boc-da-namquan",
+			Name:        "Sofa Băng Bọc Da Cao Cấp KHÔNG GIAN MỚI",
+			Slug:        "sofa-bang-boc-da-khonggianmoi",
 			Price:       15500000,
 			SalePrice:   12900000,
 			Image:       "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800",
@@ -190,12 +384,12 @@ func seedData() {
 
 	// 2. Seed Page Giới thiệu
 	aboutPage := Page{
-		Title:    "Về Thương Hiệu NAMQUAN",
+		Title:    "Về Thương Hiệu KHÔNG GIAN MỚI",
 		Slug:     "gioi-thieu",
 		MetaData: "{}",
 		HtmlContent: `<div class="prose max-w-none">
-			<h2 class="text-2xl font-bold text-amber-900 mb-4">Phong Cách Thiết Kế NAMQUAN</h2>
-			<p class="mb-4">NAMQUAN được khởi nguồn từ niềm đam mê tối giản, kết hợp giữa chất liệu gỗ tự nhiên tinh tế và đường nét hiện đại.</p>
+			<h2 class="text-2xl font-bold text-amber-900 mb-4">Phong Cách Thiết Kế KHÔNG GIAN MỚI</h2>
+			<p class="mb-4">KHÔNG GIAN MỚI được khởi nguồn từ niềm đam mê tối giản, kết hợp giữa chất liệu gỗ tự nhiên tinh tế và đường nét hiện đại.</p>
 			<blockquote class="border-l-4 border-amber-800 pl-4 italic my-4 text-gray-700">"Nội thất không chỉ để ngắm, mà là để sống cùng."</blockquote>
 			<p>Chúng tôi tự hào đem đến cho không gian sống của bạn sự ấm cúng và sang trọng vượt thời gian.</p>
 		</div>`,
