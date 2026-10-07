@@ -33,6 +33,7 @@ type Product struct {
 	ID          uint      `gorm:"primaryKey" json:"id"`
 	Name        string    `gorm:"size:255;not null" json:"name"`
 	Slug        string    `gorm:"size:255;uniqueIndex;not null" json:"slug"`
+	Type        string    `gorm:"size:100;index" json:"type"`
 	Price       float64   `gorm:"not null" json:"price"`
 	SalePrice   float64   `gorm:"default:0" json:"sale_price"`
 	Image       string    `gorm:"size:500" json:"image"`
@@ -111,11 +112,42 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "Backend Golang đang chạy thành công!"})
 	})
 
-	// 2. API Lấy danh sách sản phẩm
+	// 2. API Lấy danh sách sản phẩm (có lọc theo type hoặc category)
 	r.GET("/api/products", func(c *gin.Context) {
 		var products []Product
-		db.Preload("Category").Find(&products)
+		query := db.Preload("Category")
+		productType := c.Query("type")
+		if productType != "" {
+			query = query.Where("type = ? OR slug LIKE ?", productType, "%"+productType+"%")
+		}
+		category := c.Query("category")
+		if category != "" {
+			query = query.Joins("Category").Where("categories.slug = ?", category)
+		}
+		query.Find(&products)
 		c.JSON(http.StatusOK, products)
+	})
+
+	// 2.1 API Thêm mới sản phẩm (Dùng để nhập thông tin sản phẩm mới)
+	r.POST("/api/products", func(c *gin.Context) {
+		var input Product
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Dữ liệu không hợp lệ: " + err.Error()})
+			return
+		}
+		if input.Name == "" || input.Slug == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Tên và slug sản phẩm không được để trống."})
+			return
+		}
+		if err := db.Create(&input).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Lỗi khi lưu sản phẩm: " + err.Error()})
+			return
+		}
+		db.Preload("Category").First(&input, input.ID)
+		c.JSON(http.StatusCreated, gin.H{
+			"message": "Thêm sản phẩm thành công!",
+			"product": input,
+		})
 	})
 
 	// 3. API Lấy chi tiết 1 sản phẩm theo Slug
@@ -352,6 +384,7 @@ func seedData() {
 		{
 			Name:        "Sofa Băng Bọc Da Cao Cấp KHÔNG GIAN MỚI",
 			Slug:        "sofa-bang-boc-da-khonggianmoi",
+			Type:        "sofa-bang",
 			Price:       15500000,
 			SalePrice:   12900000,
 			Image:       "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800",
@@ -362,15 +395,55 @@ func seedData() {
 			CategoryID:  catSofa.ID,
 		},
 		{
-			Name:        "Bàn Ăn Gỗ Sồi Nguyên Khối",
+			Name:        "Bàn Ăn Gỗ Sồi Nguyên Khối 6 Ghế",
 			Slug:        "ban-an-go-soi-nguyen-khoi",
+			Type:        "ban-an",
 			Price:       8900000,
 			SalePrice:   7500000,
 			Image:       "https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?w=800",
-			Description: "Bàn ăn 6 ghế thiết kế tối giản, phong cách Bắc Âu.",
+			Description: "Bàn ăn 6 ghế thiết kế tối giản, phong cách Bắc Âu chuẩn Scandinavian.",
 			Dimensions:  "180cm x 80cm x 75cm",
-			Material:    "Gỗ Sồi Nga",
-			Stock:       5,
+			Material:    "Gỗ Sồi Nga Tự Nhiên",
+			Stock:       8,
+			CategoryID:  catBan.ID,
+		},
+		{
+			Name:        "Bàn Ăn Mặt Đá Ceramic Chống Xước",
+			Slug:        "ban-an-mat-da-ceramic",
+			Type:        "ban-an",
+			Price:       12500000,
+			SalePrice:   10800000,
+			Image:       "https://images.unsplash.com/photo-1530018607912-eff2daa1bac4?w=800",
+			Description: "Mặt đá ceramic cao cấp chịu nhiệt, chống ố vàng và chống trầy xước tuyệt đối.",
+			Dimensions:  "160cm x 85cm x 75cm",
+			Material:    "Đá Ceramic & Khung Thép Sơn Tĩnh Điện",
+			Stock:       6,
+			CategoryID:  catBan.ID,
+		},
+		{
+			Name:        "Bàn Ăn Tròn Mở Rộng Thông Minh",
+			Slug:        "ban-an-tron-thong-minh",
+			Type:        "ban-an",
+			Price:       14200000,
+			SalePrice:   11900000,
+			Image:       "https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=800",
+			Description: "Bàn ăn tròn hiện đại có thể kéo dài linh hoạt từ 4 đến 8 người ngồi.",
+			Dimensions:  "Đường kính 120cm - 160cm",
+			Material:    "Gỗ Óc Chó (Walnut)",
+			Stock:       4,
+			CategoryID:  catBan.ID,
+		},
+		{
+			Name:        "Bàn Ăn Mango 4 Ghế Nhỏ Gọn",
+			Slug:        "ban-an-mango-4-ghe",
+			Type:        "ban-an",
+			Price:       5600000,
+			SalePrice:   4500000,
+			Image:       "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800",
+			Description: "Thiết kế nhỏ gọn, đường cong bo tròn an toàn, phù hợp căn hộ chung cư vừa và nhỏ.",
+			Dimensions:  "120cm x 75cm x 75cm",
+			Material:    "Gỗ Cao Su Tự Nhiên",
+			Stock:       12,
 			CategoryID:  catBan.ID,
 		},
 	}
@@ -379,6 +452,17 @@ func seedData() {
 		var existing Product
 		if err := db.Where("slug = ?", p.Slug).First(&existing).Error; err != nil {
 			db.Create(&p)
+		} else {
+			existing.Type = p.Type
+			existing.Price = p.Price
+			existing.SalePrice = p.SalePrice
+			existing.Image = p.Image
+			existing.Description = p.Description
+			existing.Material = p.Material
+			existing.Dimensions = p.Dimensions
+			existing.Stock = p.Stock
+			existing.CategoryID = p.CategoryID
+			db.Save(&existing)
 		}
 	}
 
